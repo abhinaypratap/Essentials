@@ -25,36 +25,25 @@ class ListItemsTableViewController: UITableViewController {
 
     @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
         let alert = UIAlertController(title: "Add New Item",
-                                      message: "",
+                                      message: nil,
                                       preferredStyle: .alert)
         
         let action = UIAlertAction(title: "Add Item",
                                    style: .default) { [weak self] (action) in
-            guard let field = alert.textFields?.first, let text = field.text, !text.isEmpty else {
+            guard let field = alert.textFields?.first, let item = field.text, !item.isEmpty else {
+                
                 return
             }
-            self?.createItem(content: text)
+            self?.createItem(content: item)
         }
-        alert.addTextField { (alertTextField) in
-            alertTextField.placeholder = "Add new moment"
+        alert.addTextField { field in
+            field.placeholder = "Item name"
+            field.autocorrectionType = .no
         }
         alert.addAction(action)
         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
         present(alert, animated: true, completion: nil)
     }
-    // MARK: - Table view data source
-
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return items.count
-    }
-
-    
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: K.cell2Identifier, for: indexPath)
-        cell.textLabel?.text = items[indexPath.row].item
-        return cell
-    }
-
 }
 
 // MARK: CoreData
@@ -125,18 +114,36 @@ extension ListItemsTableViewController {
             }))
             self.present(alert, animated: true)
         }))
-        sheet.addAction(UIAlertAction(title: "Delete", style: .destructive, handler: { [weak self] _ in
-            self?.deleteItem(item: item)
-        }))
         present(sheet, animated: true)
     }
     
     // Swipe to Delete
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
-            deleteItem(item: items[indexPath.row])
-//            tableView.deleteRows(at: [indexPath], with: .bottom)
-            tableView.deleteRows(at: [indexPath], with: .right)
-        }
+            let item = items[indexPath.row]
+            let alert = UIAlertController(title: "Delete item", message: nil, preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+            alert.addAction(UIAlertAction(title: "Delete", style: .destructive, handler: { [weak self] _ in
+              self?.deleteItem(item: item)
+              self?.tableView.deleteRows(at: [indexPath], with: .right)
+            }))
+            present(alert, animated: true)
+          }
+//        {
+//            deleteItem(item: items[indexPath.row])
+//            tableView.deleteRows(at: [indexPath], with: .right)
+//        }
     }
+    
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return items.count
+    }
+
+    
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: K.cell2Identifier, for: indexPath)
+        cell.textLabel?.text = items[indexPath.row].item
+        return cell
+    }
+
 }
