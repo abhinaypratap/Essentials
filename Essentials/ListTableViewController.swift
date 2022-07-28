@@ -23,8 +23,8 @@ class ListTableViewController: UITableViewController {
     
     
     @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
-        let alert = UIAlertController(title: "Add New Item",
-                                      message: "",
+        let alert = UIAlertController(title: "New list",
+                                      message: nil,
                                       preferredStyle: .alert)
         
         let action = UIAlertAction(title: "Add",
@@ -34,30 +34,16 @@ class ListTableViewController: UITableViewController {
             }
             self?.createItem(content: text)
         }
-        alert.addTextField { (alertTextField) in
-            alertTextField.placeholder = "Add new moment"
+        alert.addTextField { field in
+            field.placeholder = "Name of the list"
         }
         alert.addAction(action)
         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
         present(alert, animated: true, completion: nil)
     }
-
-    // MARK: - Table view data source
-    
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return lists.count
-    }
-
-    
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: K.cell1Identifier, for: indexPath)
-        cell.textLabel?.text = lists[indexPath.row].list
-        return cell
-    }
-
 }
 
-// MARK: - Table View Delegate
+// MARK: - Table View Delegate and Data Source
 extension ListTableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         performSegue(withIdentifier: K.segue1Identifier, sender: self)
@@ -68,6 +54,31 @@ extension ListTableViewController {
         if let indexPath = tableView.indexPathForSelectedRow {
                 destination.selectedList = lists[indexPath.row]
         }
+    }
+    
+    // Swipe to Delete
+    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        if editingStyle == .delete {
+            let list = lists[indexPath.row]
+            let alert = UIAlertController(title: "Delete list", message: nil, preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+            alert.addAction(UIAlertAction(title: "Delete", style: .destructive, handler: { [weak self] _ in
+              self?.deleteItem(item: list)
+              self?.tableView.deleteRows(at: [indexPath], with: .right)
+            }))
+            present(alert, animated: true)
+          }
+    }
+    
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return lists.count
+    }
+
+    
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: K.cell1Identifier, for: indexPath)
+        cell.textLabel?.text = lists[indexPath.row].list
+        return cell
     }
 }
 
@@ -114,16 +125,6 @@ extension ListTableViewController {
             getAllItems()
         } catch {
             print("Error saving context \(error)")
-        }
-    }
-}
-
-extension ListTableViewController {
-    // Swipe to Delete
-    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
-        if editingStyle == .delete {
-            deleteItem(item: lists[indexPath.row])
-            tableView.deleteRows(at: [indexPath], with: .right)
         }
     }
 }
