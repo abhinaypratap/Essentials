@@ -17,7 +17,8 @@ class ListTableViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         getAllItems()
-        title = "Title"
+        title = "Lists"
+        navigationController?.navigationBar.prefersLargeTitles = true
     }
     
     
