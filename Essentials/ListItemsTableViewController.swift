@@ -129,10 +129,6 @@ extension ListItemsTableViewController {
             }))
             present(alert, animated: true)
           }
-//        {
-//            deleteItem(item: items[indexPath.row])
-//            tableView.deleteRows(at: [indexPath], with: .right)
-//        }
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
