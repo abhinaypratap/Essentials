@@ -24,6 +24,9 @@ class ListTableViewController: UITableViewController {
                                       preferredStyle: .alert)
 
         let action = UIAlertAction(title: "Add", style: .default) { [weak self] _ in
+
+            guard let strongSelf = self else { return }
+
             guard
                 let field = alert.textFields?.first,
                 let text = field.text,
@@ -31,7 +34,7 @@ class ListTableViewController: UITableViewController {
             else {
                 return
             }
-            self?.createItem(content: text)
+            strongSelf.createItem(content: text)
         }
         alert.addTextField { field in
             field.placeholder = "Name of the list"
@@ -69,8 +72,11 @@ extension ListTableViewController {
             let alert = UIAlertController(title: "Delete list", message: nil, preferredStyle: .alert)
             alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
             alert.addAction(UIAlertAction(title: "Delete", style: .destructive, handler: { [weak self] _ in
-              self?.deleteItem(item: list)
-              self?.tableView.deleteRows(at: [indexPath], with: .right)
+
+                guard let strongSelf = self else { return }
+
+                strongSelf.deleteItem(item: list)
+                strongSelf.tableView.deleteRows(at: [indexPath], with: .right)
             }))
             present(alert, animated: true)
           }

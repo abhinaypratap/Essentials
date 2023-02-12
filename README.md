@@ -8,7 +8,7 @@ A simple app where user can make a lists
 - CoreData
 - Lists can be deleted/edited/rearranged
 
-### User flow diagram of the app
+### User Flow Diagram
 
 ```mermaid
 flowchart TD

@@ -25,6 +25,9 @@ class ListItemsTableViewController: UITableViewController {
                                       preferredStyle: .alert)
 
         let action = UIAlertAction(title: "Add Item", style: .default) { [weak self] _ in
+
+            guard let strongSelf = self else { return }
+
             guard
                 let field = alert.textFields?.first,
                 let item = field.text,
@@ -32,7 +35,7 @@ class ListItemsTableViewController: UITableViewController {
             else {
                 return
             }
-            self?.createItem(content: item)
+            strongSelf.createItem(content: item)
         }
         alert.addTextField { field in
             field.placeholder = "Item name"
@@ -53,8 +56,9 @@ extension ListItemsTableViewController {
         request.predicate = predicate
         do {
             items = try context.fetch(request)
-            DispatchQueue.main.async {
-                self.tableView.reloadData()
+            DispatchQueue.main.async { [weak self] in
+                guard let strongSelf = self else { return }
+                strongSelf.tableView.reloadData()
             }
         } catch {
             print("Error fetching data from context \(error)")
@@ -100,18 +104,25 @@ extension ListItemsTableViewController {
         let item = items[indexPath.row]
         let sheet = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
         sheet.addAction(UIAlertAction(title: "Cancel", style: .cancel))
-        sheet.addAction(UIAlertAction(title: "Edit", style: .default, handler: { _ in
+        sheet.addAction(UIAlertAction(title: "Edit", style: .default, handler: { [weak self] _ in
+
+            guard let strongSelf = self else { return }
+
             let alert = UIAlertController(title: "Edit Item", message: "Edit your item", preferredStyle: .alert)
             alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
             alert.addTextField(configurationHandler: nil)
             alert.textFields?.first?.text = item.item
             alert.addAction(UIAlertAction(title: "Save", style: .default, handler: { [weak self] _ in
-                guard let field = alert.textFields?.first, let newContent = field.text, !newContent.isEmpty else {
+                guard
+                    let field = alert.textFields?.first,
+                    let newContent = field.text,
+                    !newContent.isEmpty
+                else {
                     return
                 }
                 self?.updateItem(item: item, newContent: newContent)
             }))
-            self.present(alert, animated: true)
+            strongSelf.present(alert, animated: true)
         }))
         present(sheet, animated: true)
     }
@@ -127,8 +138,9 @@ extension ListItemsTableViewController {
             let alert = UIAlertController(title: "Delete item", message: nil, preferredStyle: .alert)
             alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
             alert.addAction(UIAlertAction(title: "Delete", style: .destructive, handler: { [weak self] _ in
-              self?.deleteItem(item: item)
-              self?.tableView.deleteRows(at: [indexPath], with: .right)
+                guard let strongSelf = self else { return }
+                strongSelf.deleteItem(item: item)
+                strongSelf.tableView.deleteRows(at: [indexPath], with: .right)
             }))
             present(alert, animated: true)
           }
