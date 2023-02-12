@@ -1,23 +1,19 @@
-//
-//  ListItemsTableViewController.swift
-//  Essentials
-//
-//  Created by Abhinay Pratap on 25/06/22.
-//
-
 import UIKit
 import CoreData
 
 class ListItemsTableViewController: UITableViewController {
 
+    // swiftlint:disable force_cast
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    // swiftlint:enable force_cast
+
     private var items = [Items]()
     var selectedList: Lists? {
         didSet {
             getAllItems()
         }
     }
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         title = selectedList?.list
@@ -27,11 +23,13 @@ class ListItemsTableViewController: UITableViewController {
         let alert = UIAlertController(title: "Add New Item",
                                       message: nil,
                                       preferredStyle: .alert)
-        
-        let action = UIAlertAction(title: "Add Item",
-                                   style: .default) { [weak self] (action) in
-            guard let field = alert.textFields?.first, let item = field.text, !item.isEmpty else {
-                
+
+        let action = UIAlertAction(title: "Add Item", style: .default) { [weak self] _ in
+            guard
+                let field = alert.textFields?.first,
+                let item = field.text,
+                !item.isEmpty
+            else {
                 return
             }
             self?.createItem(content: item)
@@ -48,7 +46,7 @@ class ListItemsTableViewController: UITableViewController {
 
 // MARK: CoreData
 extension ListItemsTableViewController {
-    
+
     func getAllItems() {
         let predicate = NSPredicate(format: "parentList.list MATCHES %@", selectedList!.list!)
         let request: NSFetchRequest<Items> = Items.fetchRequest()
@@ -62,7 +60,7 @@ extension ListItemsTableViewController {
             print("Error fetching data from context \(error)")
         }
     }
-    
+
     func createItem(content: String) {
         let newItem = Items(context: context)
         newItem.item = content
@@ -74,7 +72,7 @@ extension ListItemsTableViewController {
             print("Error saving context \(error)")
         }
     }
-    
+
     func updateItem(item: Items, newContent: String) {
         item.item = newContent
         do {
@@ -84,7 +82,7 @@ extension ListItemsTableViewController {
             print("Error saving context \(error)")
         }
     }
-    
+
     func deleteItem(item: Items) {
         context.delete(item)
         do {
@@ -104,9 +102,10 @@ extension ListItemsTableViewController {
         sheet.addAction(UIAlertAction(title: "Cancel", style: .cancel))
         sheet.addAction(UIAlertAction(title: "Edit", style: .default, handler: { _ in
             let alert = UIAlertController(title: "Edit Item", message: "Edit your item", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
             alert.addTextField(configurationHandler: nil)
             alert.textFields?.first?.text = item.item
-            alert.addAction(UIAlertAction(title: "Save", style: .cancel, handler: { [weak self] _ in
+            alert.addAction(UIAlertAction(title: "Save", style: .default, handler: { [weak self] _ in
                 guard let field = alert.textFields?.first, let newContent = field.text, !newContent.isEmpty else {
                     return
                 }
@@ -116,9 +115,13 @@ extension ListItemsTableViewController {
         }))
         present(sheet, animated: true)
     }
-    
+
     // Swipe to Delete
-    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+    override func tableView(
+        _ tableView: UITableView,
+        commit editingStyle: UITableViewCell.EditingStyle,
+        forRowAt indexPath: IndexPath
+    ) {
         if editingStyle == .delete {
             let item = items[indexPath.row]
             let alert = UIAlertController(title: "Delete item", message: nil, preferredStyle: .alert)
@@ -130,14 +133,13 @@ extension ListItemsTableViewController {
             present(alert, animated: true)
           }
     }
-    
+
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return items.count
     }
 
-    
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: K.cell2Identifier, for: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: Constant.cell2Identifier, for: indexPath)
         cell.textLabel?.text = items[indexPath.row].item
         return cell
     }

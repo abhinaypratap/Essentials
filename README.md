@@ -1,12 +1,12 @@
 # Essentials
-(for iOS and iPadOS)
+
+(`iOS`, `iPadOS`)
+
+A simple app where user can make a lists
 
 - UIKit
 - CoreData
-- TableView
-- A simple app where user can make a list of anything
-- Lists can be delete, edited and rearranged
-- Swipe to delete enabled UITableView cells
+- Lists can be deleted/edited/rearranged
 
 ### User flow diagram of the app
 

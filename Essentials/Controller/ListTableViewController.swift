@@ -1,35 +1,34 @@
-//
-//  ListTableViewController.swift
-//  Essentials
-//
-//  Created by Abhinay Pratap on 25/06/22.
-//
-// TODO: stop user from making 2 or more lists or list items with same name
-
 import UIKit
 import CoreData
 
+// TODO: stop user from making 2 or more lists or list items with same name
+
 class ListTableViewController: UITableViewController {
-    
+
+    // swiftlint:disable force_cast
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    // swiftlint:enable force_cast
+
     private var lists = [Lists]()
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         getAllItems()
         title = "Lists"
         navigationController?.navigationBar.prefersLargeTitles = true
     }
-    
-    
+
     @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
         let alert = UIAlertController(title: "New list",
                                       message: nil,
                                       preferredStyle: .alert)
-        
-        let action = UIAlertAction(title: "Add",
-                                   style: .default) { [weak self] (action) in
-            guard let field = alert.textFields?.first, let text = field.text, !text.isEmpty else {
+
+        let action = UIAlertAction(title: "Add", style: .default) { [weak self] _ in
+            guard
+                let field = alert.textFields?.first,
+                let text = field.text,
+                !text.isEmpty
+            else {
                 return
             }
             self?.createItem(content: text)
@@ -46,18 +45,25 @@ class ListTableViewController: UITableViewController {
 // MARK: - Table View Delegate and Data Source
 extension ListTableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        performSegue(withIdentifier: K.segue1Identifier, sender: self)
+        performSegue(withIdentifier: Constant.segue1Identifier, sender: self)
     }
-    
+
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        let destination = segue.destination as! ListItemsTableViewController
-        if let indexPath = tableView.indexPathForSelectedRow {
-                destination.selectedList = lists[indexPath.row]
+        if segue.identifier == Constant.segue1Identifier {
+            if let destination = segue.destination as? ListItemsTableViewController {
+                if let indexPath = tableView.indexPathForSelectedRow {
+                    destination.selectedList = lists[indexPath.row]
+                }
+            }
         }
     }
-    
+
     // Swipe to Delete
-    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+    override func tableView(
+        _ tableView: UITableView,
+        commit editingStyle: UITableViewCell.EditingStyle,
+        forRowAt indexPath: IndexPath
+    ) {
         if editingStyle == .delete {
             let list = lists[indexPath.row]
             let alert = UIAlertController(title: "Delete list", message: nil, preferredStyle: .alert)
@@ -69,23 +75,20 @@ extension ListTableViewController {
             present(alert, animated: true)
           }
     }
-    
+
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return lists.count
     }
 
-    
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: K.cell1Identifier, for: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: Constant.cell1Identifier, for: indexPath)
         cell.textLabel?.text = lists[indexPath.row].list
         return cell
     }
 }
 
-
-
 extension ListTableViewController {
-    
+
     func getAllItems() {
         do {
             lists = try context.fetch(Lists.fetchRequest())
@@ -96,7 +99,7 @@ extension ListTableViewController {
             print("Error fetching data from context \(error)")
         }
     }
-    
+
     func createItem(content: String) {
         let newItem = Lists(context: context)
         newItem.list = content
@@ -107,7 +110,7 @@ extension ListTableViewController {
             print("Error saving context \(error)")
         }
     }
-    
+
     func updateItem(item: Lists, newContent: String) {
         item.list = newContent
         do {
@@ -117,7 +120,7 @@ extension ListTableViewController {
             print("Error saving context \(error)")
         }
     }
-    
+
     func deleteItem(item: Lists) {
         context.delete(item)
         do {
